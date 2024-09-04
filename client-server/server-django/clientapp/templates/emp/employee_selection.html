@@ -1,0 +1,110 @@
+{% extends 'emp/base.html' %}
+{% load static %}
+{% block title %}Select Employee - {{ block.super }}{% endblock %}
+
+{% block content %}
+<style>
+    .employee-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+    }
+
+    .employee-card h5 {
+        margin-bottom: 10px;
+        color: blue;
+    }
+
+    .employee-card img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        cursor: pointer;
+    }
+
+    .status-button {
+        margin-top: 10px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: default;
+    }
+
+    .active {
+        background-color: green;
+    }
+
+    .inactive {
+        background-color: red;
+    }
+</style>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Select Your Profile</h2>
+    <div class="row justify-content-center">
+        {% for employee in employees %}
+        <div class="col-md-2 col-sm-4 text-center mb-4 employee-card">
+            <h5>{{ employee.name }}</h5>
+            {% if employee.photo %}
+            <img src="{{ employee.photo.url }}" alt="{{ employee.name }}" data-bs-toggle="modal" data-bs-target="#passwordModal" onclick="setEmployee('{{ employee.username }}')">
+            {% else %}
+            <img src="{% static 'default_profile.png' %}" alt="{{ employee.name }}" data-bs-toggle="modal" data-bs-target="#passwordModal" onclick="setEmployee('{{ employee.username }}')">
+            {% endif %}
+            {% if employee.is_active %}
+            <div class="status-button active">Active</div>
+            {% else %}
+            <div class="status-button inactive">Inactive</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Password Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">Log In</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'emp:password_login' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                    </div>
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="text-danger" role="alert">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setEmployee(username) {
+        document.getElementById('username').value = username;
+    }
+</script>
+
+{% endblock %}
